@@ -199,6 +199,10 @@ shipping:
 These are hypotheses until we build and test rules; the initial detection package should mark them
 as such and avoid claiming coverage it does not have.
 
+Vendor detection coverage as of 18 Nov: Check Point reports IPS protection for the public PoC, without a
+published signature ID. That is vendor-reported and product-specific; it does not substitute for the
+patch or for host-side monitoring of your own stack.
+
 ---
 
 ## 7. Mitigation
@@ -214,6 +218,21 @@ bug from the JVM.
 
 **CPU reality check.** Hosts on CPUs without AVX-512 VBMI cannot reach the vulnerable code path, but
 this must be verified per host and is not a reason to leave old JDKs in place.
+
+**Temporary JVM startup flag (vendor-reported, mechanism verified in OpenJDK source, 18 Nov).** Check
+Point recommends "a startup flag where you cannot patch today", and the Xint runtime-patch README names
+it explicitly: **`-XX:-UseBASE64Intrinsics`**. Verified against OpenJDK source rather than taken on
+trust: `UseBASE64Intrinsics` is a false-by-default diagnostic flag that `vm_version_x86.cpp` sets to
+true on CPUs with AVX2 or better; `stubGenerator_x86_64.cpp` generates `_base64_decodeBlock` only
+**inside `if (UseBASE64Intrinsics)`**, and installs the AVX-512 VBMI tables only when
+`supports_avx512_vbmi()`. Disabling the flag therefore prevents the vulnerable intrinsic from being
+installed at all. Caveats: it is a **performance trade** for Base64-heavy workloads, it must be applied
+to every JVM launch path (systemd unit, container entrypoint, application server wrapper, build agents),
+it can be overridden by a later `-XX:+UseBASE64Intrinsics` on the same command line, and it is **not a
+fix**; patch as soon as the vendor build is available. Confirm the effective setting with
+`java -XX:+PrintFlagsFinal -version | grep UseBASE64Intrinsics` on a disposable instance before rolling
+it out. Check Point separately states that **Check Point IPS protection for the public PoC is available**
+(a vendor-reported detection control; the public blog does not name the signature ID).
 
 ---
 

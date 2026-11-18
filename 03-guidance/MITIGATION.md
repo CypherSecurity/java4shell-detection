@@ -8,6 +8,27 @@ dependent applications: replacing files on disk without restarting leaves the vu
 Frequency of patch cadence does not matter here; a CPU path in the runtime is not mitigated by
 application configuration.
 
+## Temporary JVM startup flag (verified mechanism, temporary mitigation)
+
+`-XX:-UseBASE64Intrinsics` disables the HotSpot Base64 intrinsic. Verified against OpenJDK source on
+18 November 2026: the flag gates generation of `_base64_decodeBlock` in `stubGenerator_x86_64.cpp`, and
+the AVX-512 VBMI tables are only installed when the CPU supports VBMI. With the flag off, the
+vulnerable intrinsic is not installed at all.
+
+Apply it to every JVM launch path: systemd units, container entrypoints, application-server wrappers,
+build agents, and anything that bundles its own JRE. Example:
+
+    JAVA_TOOL_OPTIONS="-XX:-UseBASE64Intrinsics"   # honoured by most JVMs
+    java -XX:-UseBASE64Intrinsics ...              # or directly in the launch command
+
+Confirm the effective value per host on a disposable instance:
+
+    java -XX:+PrintFlagsFinal -version | grep UseBASE64Intrinsics
+
+Caveats: it costs Base64 decode throughput; it can be overridden by a later
+`-XX:+UseBASE64Intrinsics`; it is **not a fix** and must not delay patching. Ensure no other
+JVM-level option re-enables the intrinsic.
+
 ## While patching is in progress
 
 CISA recommends restricting and validating Base64 input at the application boundary, enforcing

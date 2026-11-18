@@ -48,7 +48,9 @@ release notes. Update this table when you verify a build.
 
 CISA recommends restricting and validating Base64 input at the application boundary, enforcing
 input-size limits, and limiting unauthenticated access. These reduce exposure of specific endpoints;
-they are **not** a fix. Useful prioritisation:
+they are **not** a fix. A JVM startup flag, `-XX:-UseBASE64Intrinsics`, also suppresses the vulnerable
+intrinsic (mechanism verified in OpenJDK source; see `03-guidance/MITIGATION.md`), at a Base64
+performance cost and with the same "not a fix" caveat. Useful prioritisation:
 
 1. **Identity and access services first** — Keycloak, PingFederate, and anything that decodes Base64
    in authentication headers before credentials are checked.

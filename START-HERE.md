@@ -27,6 +27,10 @@ attacker-influenced data.
    is a heuristic: verify the vendor build. It is read-only and contains no exploit code.
 2. **Patch** — apply the vendor build for your platform (`PATCH-AVAILABILITY.md`). Rebuild and
    restart dependent applications.
+
+   If you cannot patch immediately, `-XX:-UseBASE64Intrinsics` prevents the vulnerable intrinsic from
+   being installed. It is a **temporary performance trade, not a fix**; details and caveats in
+   `03-guidance/MITIGATION.md`.
 3. **Detect** — deploy `02-detections/` rules. The Suricata rules are **experimental** and marked as
    such: they match malformed Base64 trigger shapes, which legitimately occur in some traffic.
    Test in a SPAN before blocking. The Sigma rules monitor JVM crash artefacts and unusual Java
