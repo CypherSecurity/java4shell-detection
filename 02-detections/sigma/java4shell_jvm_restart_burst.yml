@@ -1,0 +1,31 @@
+title: Internet-facing Java service restarts repeatedly (crash loop)
+id: 5b1f8a44-2d67-4c39-a1e8-9d3b6f7c2e03
+status: test
+description: >
+  Flags repeated restarts of a Java service within a short window, a pattern consistent with
+  repeated Java4Shell (CVE-2026-114938) attempts that crash the JVM. Requires your service-control
+  telemetry to expose restarts; tune thresholds to the application.
+references:
+  - https://calif.io/java4shell
+author: f4n6
+date: 2026/11/18
+tags:
+  - attack.impact
+  - attack.t1499
+logsource:
+  product: linux
+  service: systemd
+detection:
+  selection:
+    Unit|contains:
+      - 'jenkins'
+      - 'keycloak'
+      - 'tomcat'
+      - 'jira'
+      - 'confluence'
+      - 'artifactory'
+  timeframe: 15m
+  condition: selection | count() by Unit > 3
+falsepositives:
+  - Deployment pipelines, OOM kills, unrelated application faults
+level: medium

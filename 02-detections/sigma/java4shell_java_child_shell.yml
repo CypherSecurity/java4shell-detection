@@ -1,0 +1,31 @@
+title: Java process spawning a shell (post-exploitation)
+id: 3c7d9e21-0a15-4b6d-8e42-7f5d0c2b1a02
+status: test
+description: >
+  Detects a JVM process spawning a command shell. Legitimate Java services rarely spawn /bin/sh,
+  cmd.exe or PowerShell directly; security tooling and some launchers do. Relevant to Java4Shell
+  (CVE-2026-114938) only as a post-exploitation signal after a successful chain.
+references:
+  - https://calif.io/java4shell
+author: f4n6
+date: 2026/11/18
+tags:
+  - attack.execution
+  - attack.t1059
+logsource:
+  category: process_creation
+detection:
+  parent_java:
+    ParentImage|endswith:
+      - '/java'
+      - '\java.exe'
+  child_shell:
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+      - '\cmd.exe'
+      - '\powershell.exe'
+  condition: parent_java and child_shell
+falsepositives:
+  - Application launchers that shell out (build tools, wrappers, some monitoring probes)
+level: medium

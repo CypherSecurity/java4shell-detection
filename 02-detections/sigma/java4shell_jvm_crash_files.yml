@@ -1,0 +1,26 @@
+title: Java4Shell - JVM fatal error log creation
+id: 8f42f0c8-6f0e-4d3a-9d3f-1b7a2c4e5d01
+status: test
+description: >
+  Detects creation of a HotSpot fatal error log (hs_err_pid<pid>.log). A crash is the expected
+  side effect of a failed Java4Shell (CVE-2026-114938) exploitation attempt. A single crash may be
+  unrelated; a burst on an internet-facing Java service warrants investigation.
+references:
+  - https://calif.io/java4shell
+  - https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching
+author: f4n6
+date: 2026/11/18
+tags:
+  - attack.initial-access
+  - attack.t1190
+logsource:
+  category: file_event
+detection:
+  selection_name:
+    TargetFilename|endswith:
+      - '.log'
+    TargetFilename|contains: 'hs_err_pid'
+  condition: selection_name
+falsepositives:
+  - Normal JVM crashes from application bugs or memory pressure
+level: medium

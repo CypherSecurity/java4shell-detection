@@ -1,0 +1,253 @@
+# Java4Shell (CVE-2026-114938) — Threat Intelligence Dossier
+
+**Status:** living document, version 0.1 (18 November 2026, 10:45 UTC).
+**Disclosure:** 17 November 2026, by Calif.io, as "Java4Shell".
+**One-line:** a memory-corruption bug in OpenJDK's AVX-512 Base64 decoder that yields heap
+overwrite, memory disclosure and, with an application-specific chain, remote code execution on
+Java servers whose CPU exposes AVX-512 VBMI.
+
+Calibration labels used throughout: **verified** (read directly from the primary source),
+**vendor-reported** (a vendor or researcher states it; we have not reproduced it), **unverified**
+(secondary claim, not confirmed by the party it describes), **contested** (credible sources
+disagree). Deliverables contain no exploit code.
+
+---
+
+## 1. Identity and status
+
+| Item | Value | Provenance |
+|---|---|---|
+| CVE | **CVE-2026-114938** | NVD record |
+| Name | **Java4Shell** | Calif.io disclosure |
+| Published (NVD) | 2026-11-17T22:18:23Z | verified, NVD |
+| NVD status | **`Received`** (not yet `Analyzed`) | verified, NVD, 18 Nov 05:19Z |
+| Oracle CVSS 3.1 | **8.1** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H` | verified, NVD + Oracle CPU |
+| Calif CVSS 4.0 | **9.2 CRITICAL** | vendor-reported, Calif |
+| CWE | **CWE-122** (heap-based buffer overflow) | verified, NVD |
+| Component | hotspot/compiler | verified, OpenJDK advisory |
+| In CISA KEV | **No** (catalog `2026.11.17`, 1,782 entries) | verified, 18 Nov |
+| CISA alert | Yes, 17 Nov, "Critical Java Vulnerability Requires Immediate Patching" | verified, CISA |
+| Exploited in the wild | **No confirmed reports** as of 18 Nov 2026 | unverified-absence: Tenable, Check Point, Qualys all say none known |
+
+**Severity is contested.** Oracle, and NVD reflecting Oracle, call it 8.1 with
+`AC:H`. Calif markets it as 9.2 critical. Both are defensible readings of the same facts: the
+corruption is trivial to trigger, but a working chain is application-specific. Do not quote one
+score as if both sources agree.
+
+---
+
+## 2. Technical root cause (verified from the Calif disclosure and Oracle/OpenJDK records)
+
+OpenJDK accelerates Base64 decoding with hand-written x86-64 assembly using AVX-512 VBMI when the
+CPU supports it. In that path the routine mishandles the padded tail of a short malformed input:
+
+- Decoding 64 `A` characters followed by a single `=` (128 plus `=` on older JDK 17 builds) produces a
+  **negative computed output length**.
+- That length is treated as a full **64-byte write** into a 50-byte result buffer, writing roughly
+  **62 bytes past the end**.
+- Java rejects the malformed input **after** the write has happened, so neighbouring heap memory is
+  corrupted before any exception is raised.
+
+The corrupted bytes are fixed (`A`-derived), so a bare trigger usually crashes the JVM. Exploitation
+requires shaping the heap so the overwrite enlarges or redirects a neighbouring array, which then
+gives relative read/write and, from there, memory disclosure or control of execution. Calif splits
+this into two outcomes:
+
+- **"JavaBleed"**: heap disclosure, potentially exposing private keys, session tokens and credentials
+  without code execution.
+- **RCE**: application-specific chains, pre-auth where Base64 is decoded before authentication.
+
+Two further properties matter for defenders:
+
+- **CPU gate.** Only x86-64 CPUs exposing AVX-512 **VBMI** execute the vulnerable path. Calif lists
+  Intel Ice Lake, Sapphire Rapids, Emerald Rapids and Granite Rapids, and AMD Zen 4 or newer. On
+  Linux, all four of `avx512f`, `avx512bw`, `avx512vbmi`, `bmi2` must be present in
+  `/proc/cpuinfo` flags. A vulnerable JDK on a CPU without VBMI does not reach the bug.
+- **No universal exploit.** Each product needs its own chain and heap layout; failed attempts often
+  crash the process, and an attacker can usually retry. That slows mass exploitation but does not
+  protect a specific high-value target such as an identity provider.
+
+---
+
+## 3. Affected software
+
+### 3.1 OpenJDK and Oracle builds
+
+OpenJDK advisory of 17 November lists: **27.0.1.0.3, 25.0.5.0.3, 21.0.13.0.3, 17.0.21.0.3,
+11.0.33, 8u512 and earlier**. Oracle CPU adds Oracle Java SE
+`8u511b33-perf, 17.0.21.0.3, 21.0.13.0.3, 25.0.5.0.3, 27.0.1.0.3`, Oracle GraalVM for JDK
+`17.0.21.0.3` and `21.0.13.0.3`, and GraalVM Enterprise Edition `21.3.20.0.3`.
+
+**Open question:** the OpenJDK advisory's affected-version sentence names 11.0.33 and 8u512, but its
+own risk matrix marks only 17, 21, 25 and 27. The two statements are inconsistent; the dossier keeps
+both and prefers the conservative reading (treat 8 and 11 as affected) until a source resolves it.
+
+### 3.2 Distributions named as affected by the disclosure
+
+Amazon Corretto, Eclipse Temurin, Microsoft Build of OpenJDK, Azul Zulu, BellSoft Liberica, SAP
+SapMachine, Red Hat OpenJDK, Oracle OpenJDK, Oracle Java SE, Oracle GraalVM. The list is
+**vendor-reported** by Calif and should be re-verified per vendor as advisories appear.
+
+### 3.3 Fixed builds (17 November 2026), verified where stated
+
+| Distribution | Fixed version | Provenance |
+|---|---|---|
+| OpenJDK | 27.0.1.1+4 (and matching patch builds for older branches) | verified from Corretto baselines; OpenJDK advisory is source of version shape |
+| Amazon Corretto 8 | **8.514.01.1** | verified, Corretto changelog (17 Nov 2026) |
+| Amazon Corretto 11 | **11.0.33.1.1** | verified, Corretto changelog |
+| Amazon Corretto 17 | **17.0.21.1.2** | verified, Corretto changelog (lists CVE-2026-114938) |
+| Amazon Corretto 21 | **21.0.13.1.2** | verified, Corretto changelog |
+| Amazon Corretto 25 | **25.0.5.1.2** | verified, Corretto changelog |
+| Amazon Corretto 27 | **27.0.1.1.4** | verified, Corretto changelog |
+| Oracle Java SE / GraalVM | Oracle CPU November 2026 builds | vendor-published, not enumerated here |
+| Other vendors | pending | to be recorded as released |
+
+Corretto changelogs for 17/21/25/27 explicitly list CVE-2026-114938 in their CVE tables; the 8 and
+11 changelogs use an older format without a CVE table, so their fixed status rests on the release
+date and the imported OpenJDK baseline rather than an explicit line.
+
+The same patch set contains nine further Java SE CVEs (CVE-2026-114939 to CVE-2026-114947) and
+OpenJFX **CVE-2026-86144** (javafx/web, 7.5). This dossier tracks 114938 only, but patch messaging
+must not imply a single-CVE update.
+
+---
+
+## 4. Applications demonstrated vulnerable (vendor-reported by Calif; not reproduced by us)
+
+Calif says it achieved RCE in default configurations on the following, on an affected JDK on a
+VBMI-capable CPU. Treat as researcher evidence, not as our test result.
+
+**Pre-authentication RCE:** Keycloak, Atlassian Jira, Atlassian Confluence, JFrog Artifactory,
+Jenkins, PingFederate.
+
+**Post-authentication RCE:** Apache Kafka Broker, Apache Solr, Elasticsearch, Gerrit, Spinnaker.
+
+**Frameworks:** sample applications on Apache Struts and Spring Boot.
+
+**Client side:** a Java program that opens a TLS connection to an attacker-controlled server can be
+compromised even with no listening service; Calif credits samczsun for a client-side exploit.
+
+Why pre-auth is common: Base64 is decoded in HTTP Basic authentication headers, SAML artifacts,
+CSRF tokens and file uploads, often before any credential check.
+
+---
+
+## 5. Exploitation status
+
+| Claim | Status |
+|---|---|
+| In-the-wild exploitation | **none reported** by Tenable, Check Point or Qualys as of 17–18 Nov; not in KEV | 
+| Calif trigger PoC | **published**: shows whether a JDK+CPU reproduces the bug; does not give control | 
+| Product-specific exploits | **withheld** by Calif, which says it will publish them later |
+| Immersive (Kevin Breen) working exploit | **claimed on X**, app-specific, unreleased; unverified |
+| Independent RCE reproduction | **not shown** publicly; Check Point says labs reproduced crashes and memory disclosure only |
+| Root cause public | yes, since disclosure; Check Point claims a triggering input was visible since 9 September 2026 (unverified) |
+
+Assessment: the barrier to a first working exploit is **not** the trigger, it is the per-product
+heap shaping. Expect product-specific exploits to appear in the coming days to weeks. A KEV addition
+would change the calculus; there is no sign of one yet.
+
+**Observed PoC ecosystem (18 Nov 2026, first monitor run):** GitHub already returns 31 repositories for
+"java4shell" and 30 for the CVE id. The most-starred is `ikow/java4shell-poc` (★103), the same author as
+the PHP2Shell PoC repository; a defensive `theori-io/java4shell-runtime-patch-CVE-2026-114938` (★17) is
+also present, plus several low-star repos. **None has been inspected or tested by us**, and none is
+evidence of working RCE. Star counts measure attention, not capability. Rule for this programme: no
+capability claim from a repository until we have run it ourselves and recorded the conditions.
+
+---
+
+## 6. Detection and hunting
+
+### 6.1 Inventory first
+
+- Find JDK/JRE installations: package managers, container images, application bundles, appliances,
+  build agents, and third-party products that embed a JVM (Atlassian, Jenkins, JFrog, Ping, and many
+  others).
+- Determine the **runtime version** and the **CPU flags** of hosts. Both gates must be true for
+  exploitation: affected JDK and AVX-512 VBMI.
+- Prioritise internet-facing services and anything that decodes attacker-supplied Base64
+  (authentication, SAML, uploads, template rendering).
+
+### 6.2 Host indicators
+
+- JVM crash artefacts: `hs_err_pid*.log`, `core.*`, sudden JVM exits without graceful shutdown.
+- Unexpected JVM restarts on internet-facing services, especially in bursts.
+- Child processes spawned by the JVM (rare in most deployments) and unusual outbound connections
+  from Java processes.
+- New or rogue `java` installations appearing on hosts.
+
+### 6.3 Network indicators
+
+Network signature coverage for this bug is inherently weak: the trigger is a locally decoded Base64
+string, and legitimate Base64 is everywhere. Candidate high-signal patterns, to be tested before
+shipping:
+
+- HTTP `Authorization: Basic …` values whose decoded content is a run of `A` ending in a single `=`
+  at the malformed lengths the disclosure names.
+- Form or JSON fields carrying the same pattern.
+- Repeated malformed-Base64 submissions followed by JVM connection resets or 5xx, suggesting
+  exploitation attempts that crash the process.
+
+These are hypotheses until we build and test rules; the initial detection package should mark them
+as such and avoid claiming coverage it does not have.
+
+---
+
+## 7. Mitigation
+
+**Patch.** The complete fix is a fixed JDK build (OpenJDK advisory; Oracle CPU; vendor builds such as
+Corretto above). Rebuild and restart dependent applications; a JVM that keeps running old classes is
+still vulnerable.
+
+**Where patching is not immediate, CISA recommends:** restrict and validate Base64 input at the
+application boundary, enforce input-size limits, and limit unauthenticated access. These are
+compensating controls, not fixes; they reduce exposure of specific endpoints and do not remove the
+bug from the JVM.
+
+**CPU reality check.** Hosts on CPUs without AVX-512 VBMI cannot reach the vulnerable code path, but
+this must be verified per host and is not a reason to leave old JDKs in place.
+
+---
+
+## 8. Open questions
+
+1. Resolve the 8/11 affected-version inconsistency in the OpenJDK advisory (text versus risk matrix).
+2. Locate the OpenJDK source fix and confirm the exact commit; oss-security noted on 17 Nov that it
+   had not yet seen a linked fix.
+3. Which vendors have published fixed builds beyond Corretto and Oracle (Temurin, Zulu, Microsoft,
+   Liberica, SapMachine, Red Hat), with version numbers.
+4. Product advisories: Atlassian, Jenkins, JFrog, Keycloak/Red Hat, Ping Identity — what do they
+   patch or mitigate, and do they ship updated JVMs?
+5. Whether AVX-512 VBMI lists are complete and reliable per CPU generation.
+6. KEV: watch for addition; a KEV row would impose a US federal deadline and change urgency framing.
+7. Whether product-specific exploits are published when Calif said they would be, and what that does
+   to the exposure curve.
+8. Long-lived exposure through appliances that will never receive a JDK update.
+
+---
+
+## 9. Sources (accessed 18 November 2026)
+
+Primary:
+
+- Calif.io disclosure and trigger PoC: https://calif.io/java4shell
+- Oracle Critical Security Patch Update, November 2026: https://www.oracle.com/security-alerts/cspunov2026.html
+- OpenJDK vulnerability advisory 2026-11-17: https://openjdk.org/groups/vulnerability/advisories/2026-11-17
+- NVD record: https://nvd.nist.gov/vuln/detail/CVE-2026-114938
+- CISA alert, 17 November 2026: https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching
+- NCSC New Zealand alert: https://www.ncsc.govt.nz/alerts/cve-2026-114938-affecting-openjdk/
+- oss-security thread: http://www.openwall.com/lists/oss-security/2026/11/17/31
+- Amazon Corretto changelogs: https://github.com/corretto (branches 8, 11, 17, 21, 25, 27)
+
+Secondary (vendor analysis, treat as vendor-reported):
+
+- Tenable FAQ: https://www.tenable.com/blog/java4shell-cve-2026-114938-frequently-asked-questions-about-openjdk-rce-vulnerability
+- Check Point: https://blog.checkpoint.com/security/java4shell-cve-2026-114938-check-your-java-services-now
+- Qualys: https://blog.qualys.com/vulnerabilities-threat-research/2026/11/17/how-to-find-mitigate-and-patch-the-critical-java4shell-flaw-cve-2026-114938-now
+- The Record: https://therecord.media/cisa-issues-java4shell-alert
+- POLITICO: https://www.politico.com/news/2026/11/17/java-cyber-programming-vulnerability-01171822
+
+Context note (not for publication): Calif.io is the same research group that disclosed PHP2Shell,
+which this monitoring programme already tracks. That is a fact about the researchers. No source has
+established a shared campaign, common actor or coordinated targeting, and nothing in the Java4Shell
+record should be presented as connected to the PHP2Shell exploitation campaign.
