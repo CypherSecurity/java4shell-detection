@@ -21,7 +21,8 @@ disagree). Deliverables contain no exploit code.
 | CVE | **CVE-2026-114938** | NVD record |
 | Name | **Java4Shell** | Calif.io disclosure |
 | Published (NVD) | 2026-11-17T22:18:23Z | verified, NVD |
-| NVD status | **`Received`** (not yet `Analyzed`) | verified, NVD, 18 Nov 05:19Z |
+| NVD lastModified | 2026-11-18T13:45:37Z (status moved to Awaiting Analysis; refs 9, scores and CWE unchanged) | verified, NVD |
+| NVD status | **`Undergoing Analysis`** (Received → Awaiting Analysis → Undergoing Analysis, 18 Nov; not yet analyzed) | verified, NVD |
 | Oracle CVSS 3.1 | **8.1** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H` | verified, NVD + Oracle CPU |
 | Calif CVSS 4.0 | **9.2 CRITICAL** | vendor-reported, Calif |
 | CWE | **CWE-122** (heap-based buffer overflow) | verified, NVD |
@@ -143,6 +144,8 @@ CSRF tokens and file uploads, often before any credential check.
 | Immersive (Kevin Breen) working exploit | **claimed on X**, app-specific, unreleased; unverified |
 | Independent RCE reproduction | **not shown** publicly; Check Point says labs reproduced crashes and memory disclosure only |
 | Root cause public | yes, since disclosure; Check Point claims a triggering input was visible since 9 September 2026 (unverified) |
+| National CERT position | Canadian Centre for Cyber Security (AL26-029, 17 Nov): "not aware of active exploitation at this time, but that can change quickly"; CIRCL (TR-104, 18 Nov): not independently confirmed; Cisco Talos (17 Nov): not observed, anticipates probing soon. **Verified quotes, all as of 17–18 Nov** |
+| Commercial exploit availability | **VulnCheck states a full RCE exploit is available to its Initial Access Intelligence customers as of 6 PM EST, 17 November**, with a version scanner, PCAP and detection rules. Not public, not verified by us. This is capability distribution, not evidence of use |
 
 Assessment: the barrier to a first working exploit is **not** the trigger, it is the per-product
 heap shaping. Expect product-specific exploits to appear in the coming days to weeks. A KEV addition
@@ -161,6 +164,19 @@ risk, not as a substitute for a vendor patch. The remainder are low-star reposit
 **We have inspected repository metadata and READMEs but not reviewed or run any code from them**, and
 none is evidence of working RCE. Star counts measure attention, not capability. Programme rule: no
 capability claim from a repository until we have run it ourselves and recorded the conditions.
+
+**Ecosystem progression, 18 November 15:00 UTC:** the public repository set is no longer just PoC
+material. At least four repositories now advertise full chains or probes, all by different authors and
+all unverified by us: `TahuCryptsi/poc-cve-2026-114938-java4shell-base64-oob` (★1, "local + remote HTTP
+RCE chain"), `FebusAI/java4shell-poc` (★0, "PoC + RCE chain + remote probe"), `AweiMC/Java4Shell-
+Deterministic-DoS-PoC` (★5, deterministic denial of service) and `r3dvei1/java4shell` (★1, analysis and
+lab stack, explicitly **no** chain). `ikow/java4shell-poc` rose to ★128. Their appearance is consistent
+with the disclosure's own timeline (Calif said product-specific exploits would be published later) and
+is a meaningful change in the exploitability landscape: the raw trigger is public, and these claims
+suggest others are working the chains. It is **not** evidence of in-the-wild exploitation, and none of
+the claims has been independently confirmed. Re-check before citing any of them; do not download and run
+them on operational systems.
+
 
 ---
 
@@ -253,7 +269,29 @@ it out. Check Point separately states that **Check Point IPS protection for the 
 
 ---
 
-## 9. Sources (accessed 18 November 2026)
+## 9. Vendor advisories
+
+These are product-vendor responses beyond the JDK patch itself. They matter where a product embeds a JVM.
+
+**Cisco (verified, read directly 18 November 2026).** Advisory
+`cisco-sa-nov2026-java-rce-eCa6ss9z`, "Vulnerability in Oracle OpenJDK (Java4Shell) Affecting Cisco
+Products": first published **2026-11-18 16:00 GMT**, **Version 1.0, Interim**. At that version Cisco
+states it "is investigating its product line to determine which products may be affected" and **has not
+yet listed any affected products or fixed releases**; there are **no workarounds**. Cisco's stated
+hardware scope matches the disclosure: x86-64 with AVX-512 VBMI is affected, while x86-64 without
+AVX-512 and ARM or Cisco Silicon One are not. Exploitation: Cisco PSIRT "is aware that proof-of-concept
+exploit code is available" and "is not aware of any malicious use". Treat this as an open, evolving
+advisory; re-read before quoting Cisco product exposure.
+
+**Check Point (vendor-reported).** Recommends a startup flag where patching cannot happen immediately
+and reports IPS protection for the public PoC; its own update says patching remains the only complete
+fix. The flag is verified in OpenJDK source (see §7).
+
+No other product-vendor advisory has been verified by us as of 18 November 2026. Atlassian, Jenkins,
+JFrog, Keycloak/Red Hat and Ping Identity advisories are being watched; absence here means unverified,
+not that none exists.
+
+## 10. Sources (accessed 18 November 2026)
 
 Primary:
 
@@ -262,6 +300,10 @@ Primary:
 - OpenJDK vulnerability advisory 2026-11-17: https://openjdk.org/groups/vulnerability/advisories/2026-11-17
 - NVD record: https://nvd.nist.gov/vuln/detail/CVE-2026-114938
 - CISA alert, 17 November 2026: https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching
+- Cisco advisory (interim, read directly): https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-nov2026-java-rce-eCa6ss9z
+- Canadian Centre for Cyber Security AL26-029: https://www.cyber.gc.ca/en/alerts-advisories/al26-029-critical-vulnerability-impacting-oracle-java-cve-2026-114938
+- Cisco Talos analysis: https://blog.talosintelligence.com/java4shell/
+- CIRCL TR-104: https://www.circl.lu/pub/tr-104/
 - NCSC New Zealand alert: https://www.ncsc.govt.nz/alerts/cve-2026-114938-affecting-openjdk/
 - oss-security thread: http://www.openwall.com/lists/oss-security/2026/11/17/31
 - Amazon Corretto changelogs: https://github.com/corretto (branches 8, 11, 17, 21, 25, 27)
@@ -272,6 +314,8 @@ Secondary (vendor analysis, treat as vendor-reported):
 - Check Point: https://blog.checkpoint.com/security/java4shell-cve-2026-114938-check-your-java-services-now
 - Qualys: https://blog.qualys.com/vulnerabilities-threat-research/2026/11/17/how-to-find-mitigate-and-patch-the-critical-java4shell-flaw-cve-2026-114938-now
 - The Record: https://therecord.media/cisa-issues-java4shell-alert
+- VulnCheck analysis (states commercial RCE exploit availability): https://www.vulncheck.io/blog/java4shell
+- Aikido analysis: https://www.aikido.dev/blog/java-17-rce-vulnerability-cve-2026-114938
 - POLITICO: https://www.politico.com/news/2026/11/17/java-cyber-programming-vulnerability-01171822
 
 Context note (not for publication): Calif.io is the same research group that disclosed PHP2Shell,

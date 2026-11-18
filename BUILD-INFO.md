@@ -14,6 +14,8 @@
 - Corretto fixed builds read from each branch's CHANGELOG: 8.514.01.1, 11.0.33.1.1,
   17.0.21.1.2, 21.0.13.1.2, 25.0.5.1.2, 27.0.1.1.4, all released 17 Nov 2026.
 - CISA KEV: **not listed** (catalog 2026.11.17).
+- Cisco advisory `cisco-sa-nov2026-java-rce-eCa6ss9z` read directly (18 Nov): Version 1.0 Interim, no
+  affected products or fixed releases yet, no workarounds; PSIRT aware of PoC, not of malicious use.
 - Startup-flag mitigation verified in OpenJDK source: `UseBASE64Intrinsics` gates generation of
   `_base64_decodeBlock` (`stubGenerator_x86_64.cpp`), defaulted on for AVX2+ CPUs in
   `vm_version_x86.cpp`; VBMI tables installed only when `supports_avx512_vbmi()`. Vendor-reported by

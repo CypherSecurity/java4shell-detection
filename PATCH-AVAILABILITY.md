@@ -58,6 +58,16 @@ performance cost and with the same "not a fix" caveat. Useful prioritisation:
 3. **Data services with authenticated access** — Kafka, Solr, Elasticsearch, Gerrit, Spinnaker.
 4. **Everything else that embeds a JVM** — appliances, build agents, container images.
 
+## Product-vendor advisories (products that embed a JVM)
+
+| Vendor | Advisory | State (as of 18 Nov 2026) |
+|---|---|---|
+| Cisco | `cisco-sa-nov2026-java-rce-eCa6ss9z`, "Vulnerability in Oracle OpenJDK (Java4Shell) Affecting Cisco Products" | **Version 1.0, Interim, first published 18 Nov 16:00 GMT**: Cisco is investigating its product line; **no affected products or fixed releases listed yet**, **no workarounds**. Scope statement matches the disclosure: x86-64 with AVX-512 VBMI affected; x86-64 without AVX-512, ARM and Cisco Silicon One not affected. Re-read before quoting Cisco exposure |
+
+If you run a product that embeds a JVM (Atlassian, Jenkins, JFrog, Ping, Cisco and others), check the
+vendor's own advisory rather than assuming either state. This table is updated only when a vendor
+advisory is read and verified by this programme.
+
 ## Verify the gate, not just the version
 
 An affected JDK on a CPU without AVX-512 VBMI does not execute the vulnerable path, and a
