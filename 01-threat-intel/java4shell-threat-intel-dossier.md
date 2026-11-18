@@ -2,7 +2,7 @@
 
 **Status:** living document, version 0.1 (18 November 2026, 10:45 UTC).
 **Disclosure:** 17 November 2026, by Calif.io, as "Java4Shell".
-**Programme:** watch running hourly during the discovery phase; public page https://f4n6.co.uk/java4shell/; package and release https://github.com/CypherSecurity/java4shell-detection (package `java4shell-detection-package-2026-11-17`, sha256 recorded on each build; rules and checker validated in the package's `05-validation/VALIDATION-REPORT.md`).
+**Programme:** watch running hourly during the discovery phase; public page https://f4n6.co.uk/java4shell/; package and release https://github.com/CypherSecurity/java4shell-detection (package `java4shell-detection-package-2026-11-17`; its current size and sha256 are shown on the public page and in Build info; rules and checker validated in its `05-validation/VALIDATION-REPORT.md`).
 **One-line:** a memory-corruption bug in OpenJDK's AVX-512 Base64 decoder that yields heap
 overwrite, memory disclosure and, with an application-specific chain, remote code execution on
 Java servers whose CPU exposes AVX-512 VBMI.
@@ -29,7 +29,7 @@ disagree). Deliverables contain no exploit code.
 | Component | hotspot/compiler | verified, OpenJDK advisory |
 | In CISA KEV | **No** (catalog `2026.11.17`, 1,782 entries) | verified, 18 Nov |
 | CISA alert | Yes, 17 Nov, "Critical Java Vulnerability Requires Immediate Patching" | verified, CISA |
-| Exploited in the wild | **No confirmed reports** as of 18 Nov 2026 | unverified-absence: Tenable, Check Point, Qualys all say none known |
+| Exploited in the wild | **Exploitation attempts observed**, no confirmed successful exploitation or victim as of 18 Nov 2026 20:00 UTC | GreyNoise live dashboard (read directly): **4 source IPs sending trigger-shaped Base64, 69 shaped requests, 0 successful intrusions**. Tenable's 18 Nov update reports the same attempts. Not in KEV |
 
 **Severity is contested.** Oracle, and NVD reflecting Oracle, call it 8.1 with
 `AC:H`. Calif markets it as 9.2 critical. Both are defensible readings of the same facts: the
@@ -174,6 +174,26 @@ risk, not as a substitute for a vendor patch. The remainder are low-star reposit
 none is evidence of working RCE. Star counts measure attention, not capability. Programme rule: no
 capability claim from a repository until we have run it ourselves and recorded the conditions.
 
+**Exploitation attempts, 17–18 November (verified from GreyNoise's live dashboard, read 18 Nov 20:00 UTC).**
+GreyNoise reports scanning and exploitation attempts against CVE-2026-114938:
+
+- **4 source IPs** sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
+  Bearer): `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`, `134.82.73[.]91`.
+- **69 shaped requests** in total, against paths such as `/`, `/api/`, `/rest/api-application/1.0/
+  application-info` and `/rpc/xml`.
+- **0 successful intrusions**; GreyNoise states it has "not confirmed successful exploitation against
+  GreyNoise gridpoints yet".
+- GreyNoise tags in use: **"Base64 Heap Overflow RCE Attempt v2"** (malicious) and **"Scanner Check"**
+  (suspicious). User-agents seen include `java4shell-scanner/1.0`, `Go-http-client/1.1` and `nerva/1.0`;
+  one JA4H fingerprint clusters three Amazon-AS16509 addresses (`po11nn070000_466fa246f160_...`).
+- Tenable's 18 November update also states "GreyNoise has reported exploitation attempts ... but has not
+  confirmed any successful exploitation against its sensors".
+
+Reading: attempts are real and automated, but scanners sending a trigger shape are not proof of a
+worked chain. "0 successful intrusions" is a sensor-scoped statement, not a global all-clear. If
+GreyNoise's successful-intrusion counter moves off zero, that is the strongest public signal available
+and should change the advisory's status line immediately.
+
 **Ecosystem progression, 18 November 15:00 UTC:** the public repository set is no longer just PoC
 material. At least four repositories now advertise full chains or probes, all by different authors and
 all unverified by us: `TahuCryptsi/poc-cve-2026-114938-java4shell-base64-oob` (★1, "local + remote HTTP
@@ -296,6 +316,25 @@ advisory; re-read before quoting Cisco product exposure.
 and reports IPS protection for the public PoC; its own update says patching remains the only complete
 fix. The flag is verified in OpenJDK source (see §7).
 
+**Siemens (verified, read directly 18 November 2026).** SSA-272816, "Java4Shell Vulnerability in
+Industrial Edge", **V1.0, published 2026-11-18**, CVSS 3.1 8.1. **Affected with no fix available at V1.0:**
+Industrial Edge Management Pro V1, IEM Pro V2 and IEM Virtual, all versions. Known not affected:
+Industrial Edge Device Kit (no Java) and IEM Cloud (different platform). Siemens lists four required
+conditions: an affected JVM (including bundled runtimes), x86-64 with AVX-512 VBMI, untrusted Base64
+reaching `Base64.getDecoder()`/`getUrlDecoder()`, and a JIT-compiled decoder. Its mitigation is blunt:
+**block direct internet access to IEM Pro/IEM Virtual, or shut instances down until a fix exists.** This
+is the clearest "affected but unpatched" product case so far.
+
+**Keycloak (verified, read directly 18 November 2026, last updated 09:29 UTC).** The Keycloak team
+states that container images `26.8.2-1` and `26.8.2-2` bundle an affected **OpenJDK 21.0.13**; the ZIP/TAR
+distribution can also be affected depending on its runtime and CPU. Keycloak decodes Base64 before
+authentication, so a login requirement is not protection. Preferred interim mitigation is Red Hat's
+`-XX:-UseBASE64Intrinsics` via `JAVA_OPTS_APPEND`, with `JDK_JAVA_OPTIONS` for the Operator, verified on
+the live JVM with `jcmd ... VM.flags -all | grep UseBASE64Intrinsics` (expected
+`UseBASE64Intrinsics = false`). **At the time of writing the team cannot recommend a specific fixed
+Keycloak image** and will publish rebuilt images when patched runtimes are available. Treat Keycloak
+version numbers alone as insufficient.
+
 No other product-vendor advisory has been verified by us as of 18 November 2026. Atlassian, Jenkins,
 JFrog, Keycloak/Red Hat and Ping Identity advisories are being watched; absence here means unverified,
 not that none exists.
@@ -310,6 +349,9 @@ Primary:
 - NVD record: https://nvd.nist.gov/vuln/detail/CVE-2026-114938
 - CISA alert, 17 November 2026: https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching
 - Cisco advisory (interim, read directly): https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-nov2026-java-rce-eCa6ss9z
+- Siemens SSA-272816 (read directly): https://cert-portal.siemens.com/productcert/html/ssa-272816.html
+- Keycloak guidance: https://www.keycloak.org/2026/11/java4shell-vulnerability-cve-2026-114938
+- GreyNoise live activity dashboard (read directly): https://java4shell.events.greynoise.io/
 - Canadian Centre for Cyber Security AL26-029: https://www.cyber.gc.ca/en/alerts-advisories/al26-029-critical-vulnerability-impacting-oracle-java-cve-2026-114938
 - Cisco Talos analysis: https://blog.talosintelligence.com/java4shell/
 - CIRCL TR-104: https://www.circl.lu/pub/tr-104/

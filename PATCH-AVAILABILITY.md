@@ -78,6 +78,8 @@ performance cost and with the same "not a fix" caveat. Useful prioritisation:
 | Vendor | Advisory | State (as of 18 Nov 2026) |
 |---|---|---|
 | Cisco | `cisco-sa-nov2026-java-rce-eCa6ss9z`, "Vulnerability in Oracle OpenJDK (Java4Shell) Affecting Cisco Products" | **Version 1.0, Interim, first published 18 Nov 16:00 GMT**: Cisco is investigating its product line; **no affected products or fixed releases listed yet**, **no workarounds**. Scope statement matches the disclosure: x86-64 with AVX-512 VBMI affected; x86-64 without AVX-512, ARM and Cisco Silicon One not affected. Re-read before quoting Cisco exposure |
+| Siemens | `SSA-272816`, "Java4Shell Vulnerability in Industrial Edge" | **V1.0, 18 Nov 2026**: **affected, no fix available** for Industrial Edge Management Pro V1, Pro V2 and Virtual (all versions). Not affected: Industrial Edge Device Kit (no Java) and IEM Cloud. Mitigation: block direct internet access or shut the instances down until a fix exists |
+| Keycloak / Red Hat | Keycloak guidance post, 18 Nov (updated 09:29 UTC) | Images **26.8.2-1 and 26.8.2-2 bundle affected OpenJDK 21.0.13**; **no fixed Keycloak image recommended yet**. Preferred interim mitigation `-XX:-UseBASE64Intrinsics` via `JAVA_OPTS_APPEND` (Operator: `JDK_JAVA_OPTIONS`), verified with `jcmd ... VM.flags -all`. Keycloak decodes Base64 before authentication |
 
 If you run a product that embeds a JVM (Atlassian, Jenkins, JFrog, Ping, Cisco and others), check the
 vendor's own advisory rather than assuming either state. This table is updated only when a vendor

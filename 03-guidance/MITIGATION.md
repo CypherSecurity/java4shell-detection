@@ -29,6 +29,30 @@ Caveats: it costs Base64 decode throughput; it can be overridden by a later
 `-XX:+UseBASE64Intrinsics`; it is **not a fix** and must not delay patching. Ensure no other
 JVM-level option re-enables the intrinsic.
 
+## Product-specific interim steps (verified from vendor guidance, 18 Nov)
+
+**Keycloak.** The Keycloak team reports that images `26.8.2-1` and `26.8.2-2` bundle an affected
+OpenJDK 21.0.13, and that session protection is not enough because Keycloak decodes Base64 before
+authentication. Set the flag through the startup options the image already honours and restart every
+instance:
+
+    JAVA_OPTS_APPEND="-XX:-UseBASE64Intrinsics"      # Keycloak server
+    JDK_JAVA_OPTIONS="-XX:-UseBASE64Intrinsics"      # Keycloak Operator (separate JVM)
+
+For the Operator, set the variable on the Deployment or in the OLM Subscription so it survives
+reconciliation. Verify the running JVM, not the environment variable:
+
+    jcmd <pid> VM.flags -all | grep UseBASE64Intrinsics
+    # expected: bool UseBASE64Intrinsics = false {product} {command line}
+
+Check every pod and failover node. At the time of writing the Keycloak team had not published a
+recommended fixed image; take rebuilt images when they appear.
+
+**Siemens Industrial Edge.** SSA-272816 lists Industrial Edge Management Pro V1, Pro V2 and Virtual as
+affected with **no fix available at V1.0**. Siemens' mitigation is to block direct internet access to
+IEM Pro / IEM Virtual, or shut the instances down, until a fix is released. Do not expose these
+management interfaces while unpatched.
+
 ## While patching is in progress
 
 CISA recommends restricting and validating Base64 input at the application boundary, enforcing

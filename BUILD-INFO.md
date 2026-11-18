@@ -36,6 +36,13 @@
 - Published artifacts: repo tree 15 blobs, release ZIP 26,230 bytes, cache-busted download SHA256
   matches. Full record in `05-validation/VALIDATION-REPORT.md`.
 
+- GreyNoise live dashboard (read directly 18 Nov): 4 IPs, 69 shaped requests, 0 successful intrusions.
+- Siemens SSA-272816 (read directly): V1.0 18 Nov; IEM Pro V1/V2/Virtual affected, no fix, block-internet
+  mitigation; Device Kit and IEM Cloud not affected.
+- Keycloak guidance post (read directly, updated 18 Nov 09:29 UTC): 26.8.2-1/-2 bundle affected 21.0.13;
+  no fixed image recommended yet; flag mitigation with jcmd verification.
+- Tenable article update 18 Nov read: attempts reported via GreyNoise, VulnCheck exploit for customers.
+
 ## What is not verified
 
 - No reproduction of the bug, crash or RCE by us. No exploit code was run.

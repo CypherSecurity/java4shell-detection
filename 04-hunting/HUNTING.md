@@ -3,6 +3,22 @@
 Hunting hypotheses, highest value first. The vulnerability is only reachable on an affected JDK on
 an AVX-512 VBMI CPU, so start by bounding the population, then look for effects.
 
+## Observed attempt indicators (GreyNoise, 18 November 2026)
+
+GreyNoise's live dashboard reports **4 source IPs sending Java4Shell trigger-shaped Basic/Bearer values,
+69 requests, 0 successful intrusions** as of 18 November 20:00 UTC. Treat these as hunting leads, not
+attribution.
+
+- Source IPs (defanged): `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`, `134.82.73[.]91`.
+- Paths requested: `/`, `/api/`, `/rest/api-application/1.0/application-info`, `/rpc/xml`.
+- GreyNoise tags: **"Base64 Heap Overflow RCE Attempt v2"** (malicious), **"Scanner Check"** (suspicious).
+- User-agents observed: `java4shell-scanner/1.0`, `Go-http-client/1.1`, `nerva/1.0`.
+- A JA4H fingerprint clusters three Amazon-AS16509 addresses:
+  `po11nn070000_466fa246f160_000000000000_000000000000`.
+
+A trigger-shaped request is an attempt, not a success. If GreyNoise's successful-intrusion counter moves
+off zero, escalate the posture and say so plainly.
+
 ## H1: JVM crash artefacts on internet-facing Java services
 
 Look for `hs_err_pid*.log`, core dumps and `java` processes that died without graceful shutdown:
