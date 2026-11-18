@@ -16,6 +16,17 @@
 - CISA KEV: **not listed** (catalog 2026.11.17).
 - CISA alert and NCSC-NZ alert: read.
 
+## Validation performed on this build
+
+- Suricata 8.0.8: both rules load, both fire on a synthetic malformed-Base64 request, neither fires
+  on a benign Basic-auth control; a malformed negative-control rule is correctly rejected.
+- Sigma: sigma-cli 4.0.1 reports 0 errors and 0 validation issues; rules convert to Splunk queries.
+  The restart-burst rule was rewritten as a correlation rule after validation rejected its original
+  aggregation syntax.
+- Exposure checker: eleven stub JDK versions produce the expected verdicts in text and JSON modes.
+- Published artifacts: repo tree 15 blobs, release ZIP 26,230 bytes, cache-busted download SHA256
+  matches. Full record in `05-validation/VALIDATION-REPORT.md`.
+
 ## What is not verified
 
 - No reproduction of the bug, crash or RCE by us. No exploit code was run.
@@ -24,8 +35,8 @@
 - No confirmed in-the-wild exploitation as of 18 Nov 2026.
 - Fixed builds beyond Corretto/Oracle (Temurin, Zulu, Microsoft, Liberica, SapMachine, Red Hat) are
   pending and will be added when published.
-- The Suricata rules are experimental and untested on production traffic; false positives are
-  expected. Sigma rules are behavioural and should be tuned to your environment.
+- The Suricata rules are validated for syntax and match logic but **untested on production traffic**;
+  false positives are expected. Sigma rules are validated and converted, not deployed on a SIEM.
 
 ## Ground rules
 

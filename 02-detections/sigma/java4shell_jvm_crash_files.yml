@@ -1,4 +1,5 @@
 title: Java4Shell - JVM fatal error log creation
+name: java4shell_jvm_crash_files
 id: 8f42f0c8-6f0e-4d3a-9d3f-1b7a2c4e5d01
 status: test
 description: >

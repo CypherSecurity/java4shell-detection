@@ -2,6 +2,7 @@
 
 **Status:** living document, version 0.1 (18 November 2026, 10:45 UTC).
 **Disclosure:** 17 November 2026, by Calif.io, as "Java4Shell".
+**Programme:** watch running hourly during the discovery phase; public page https://f4n6.co.uk/java4shell/; package and release https://github.com/CypherSecurity/java4shell-detection (package `java4shell-detection-package-2026-11-17`, sha256 recorded on each build; rules and checker validated in the package's `05-validation/VALIDATION-REPORT.md`).
 **One-line:** a memory-corruption bug in OpenJDK's AVX-512 Base64 decoder that yields heap
 overwrite, memory disclosure and, with an application-specific chain, remote code execution on
 Java servers whose CPU exposes AVX-512 VBMI.
@@ -147,11 +148,18 @@ Assessment: the barrier to a first working exploit is **not** the trigger, it is
 heap shaping. Expect product-specific exploits to appear in the coming days to weeks. A KEV addition
 would change the calculus; there is no sign of one yet.
 
-**Observed PoC ecosystem (18 Nov 2026, first monitor run):** GitHub already returns 31 repositories for
-"java4shell" and 30 for the CVE id. The most-starred is `ikow/java4shell-poc` (★103), the same author as
-the PHP2Shell PoC repository; a defensive `theori-io/java4shell-runtime-patch-CVE-2026-114938` (★17) is
-also present, plus several low-star repos. **None has been inspected or tested by us**, and none is
-evidence of working RCE. Star counts measure attention, not capability. Rule for this programme: no
+**Observed PoC ecosystem (18 Nov 2026, verified against repository metadata):** GitHub returns 32
+repositories for "java4shell" and 31 for the CVE id. The most-starred is `ikow/java4shell-poc` (★104),
+described by its author as "OpenJDK AVX-512 Base64 heap overflow PoC, scanner & detection rules
+(Suricata, Sigma, ModSecurity)"; it is by the same author as the PHP2Shell PoC repository. Also
+prominent is `theori-io/java4shell-runtime-patch-CVE-2026-114938` (★17), which is not a defensive
+scanner but a **third-party temporary runtime patch** supplied by Xint that attaches an agent to a
+running JVM to disable the vulnerable intrinsic, installed with a `curl | sh` one-liner and stated to
+be memory-only and lost on restart. Treat that one as unvetted third-party code with supply-chain
+risk, not as a substitute for a vendor patch. The remainder are low-star repositories.
+
+**We have inspected repository metadata and READMEs but not reviewed or run any code from them**, and
+none is evidence of working RCE. Star counts measure attention, not capability. Programme rule: no
 capability claim from a repository until we have run it ourselves and recorded the conditions.
 
 ---

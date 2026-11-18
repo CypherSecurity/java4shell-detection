@@ -22,8 +22,9 @@ attacker-influenced data.
 ## Do these four things
 
 1. **Inventory** — run `02-detections/common/check-java4shell-exposure.sh` on representative hosts
-   (see `03-guidance/INVENTORY.md`). It reports installed Java versions and the CPU gate. It is
-   read-only and contains no exploit code.
+   (see `03-guidance/INVENTORY.md`). It reports installed Java versions, a base-version verdict
+   (AFFECTED_BASE / PATCHED_LIKELY / NOT_AFFECTED_PRE_17.0.6 / UNKNOWN) and the CPU gate. The verdict
+   is a heuristic: verify the vendor build. It is read-only and contains no exploit code.
 2. **Patch** — apply the vendor build for your platform (`PATCH-AVAILABILITY.md`). Rebuild and
    restart dependent applications.
 3. **Detect** — deploy `02-detections/` rules. The Suricata rules are **experimental** and marked as
