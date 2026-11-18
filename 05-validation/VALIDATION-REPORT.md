@@ -55,6 +55,7 @@ covering the affected and patched lines:
 | `11.0.32` | AFFECTED_BASE |
 | `11.0.33.1` | PATCHED_LIKELY |
 | `1.8.0_512` | AFFECTED_BASE |
+| `1.8.0_513` | PATCHED_LIKELY (following CCCS AL26-029, which names 8u513-perf as the fixed Oracle build) |
 | `1.8.0_514` | PATCHED_LIKELY |
 | `27.0.1` | AFFECTED_BASE |
 | `27.0.1.1` | PATCHED_LIKELY |
@@ -76,6 +77,10 @@ from the OpenJDK advisory, and is labelled as such.
 | Release `v2026-11-17` | ZIP **26,230 bytes**, SHA256 sidecar present |
 | Cache-busted re-download | SHA256 matches local `e6ce6d86d1742581…` |
 | Page <https://f4n6.co.uk/java4shell/> | shows the same SHA and size, status lines present |
+
+**Revalidation, 18 Nov 16:00 UTC:** classifier changed after the Canadian Centre published a fixed-build
+table (8u513-perf for Oracle Java 8); stubs 8u512 / 8u513 / 8u514 now return AFFECTED_BASE /
+PATCHED_LIKELY / PATCHED_LIKELY respectively, tested after the change.
 
 ## 5. Not validated
 

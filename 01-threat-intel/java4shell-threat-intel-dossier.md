@@ -101,8 +101,17 @@ SapMachine, Red Hat OpenJDK, Oracle OpenJDK, Oracle Java SE, Oracle GraalVM. The
 | Amazon Corretto 21 | **21.0.13.1.2** | verified, Corretto changelog |
 | Amazon Corretto 25 | **25.0.5.1.2** | verified, Corretto changelog |
 | Amazon Corretto 27 | **27.0.1.1.4** | verified, Corretto changelog |
-| Oracle Java SE / GraalVM | Oracle CPU November 2026 builds | vendor-published, not enumerated here |
+| Oracle Java SE 8 | **8u513-perf** | CCCS AL26-029 (page read 18 Nov); the Oracle CPU page we captured does not display this build string |
+| Oracle Java SE 17 / 21 / 25 / 27 | **17.0.21.1 / 21.0.13.1 / 25.0.5.1 / 27.0.1.1** | CCCS AL26-029; consistent with the OpenJDK patch releases Corretto imports |
+| Oracle GraalVM for JDK | **17.0.21.1 and 21.0.13.1** | CCCS AL26-029 |
+| Oracle GraalVM Enterprise Edition | **21.3.20.1** | CCCS AL26-029 |
+| Oracle OpenJDK | **27.0.1.1** (covers 17.0.6–27.0.1.0.3) | CCCS AL26-029 |
 | Other vendors | pending | to be recorded as released |
+
+**Version-numbering caveat:** Oracle's Java 8 fixed build is named `8u513-perf` by the Canadian Centre,
+while Amazon Corretto's 8-line fix is **8.514.01.1** and imports OpenJDK **8u514-b01**. Those are
+different numbering schemes for the same upstream fix, not conflicting reports. Compare like with like
+per vendor; do not treat "8u513" and "8.514" as the same string.
 
 Corretto changelogs for 17/21/25/27 explicitly list CVE-2026-114938 in their CVE tables; the 8 and
 11 changelogs use an older format without a CVE table, so their fixed status rests on the release

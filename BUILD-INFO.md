@@ -16,6 +16,9 @@
 - CISA KEV: **not listed** (catalog 2026.11.17).
 - Cisco advisory `cisco-sa-nov2026-java-rce-eCa6ss9z` read directly (18 Nov): Version 1.0 Interim, no
   affected products or fixed releases yet, no workarounds; PSIRT aware of PoC, not of malicious use.
+- Canadian Centre for Cyber Security AL26-029 fixed-build table read directly (18 Nov): Oracle Java SE
+  8u513-perf, 17.0.21.1, 21.0.13.1, 25.0.5.1, 27.0.1.1; GraalVM 17.0.21.1 / 21.0.13.1 and EE
+  21.3.20.1; Oracle OpenJDK 27.0.1.1. Oracle CPU page captured does not show the 8u513 string.
 - Startup-flag mitigation verified in OpenJDK source: `UseBASE64Intrinsics` gates generation of
   `_base64_decodeBlock` (`stubGenerator_x86_64.cpp`), defaulted on for AVX2+ CPUs in
   `vm_version_x86.cpp`; VBMI tables installed only when `supports_avx512_vbmi()`. Vendor-reported by

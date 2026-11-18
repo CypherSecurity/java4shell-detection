@@ -27,10 +27,10 @@ classify() {
   local v="$1" verdict="UNKNOWN"
   if [[ "$v" =~ ^1\.8\.0_([0-9]+) ]]; then
     local u="${BASH_REMATCH[1]}"
-    if [ "$u" -le 512 ]; then verdict="AFFECTED_BASE"; elif [ "$u" -le 513 ]; then verdict="UNKNOWN"; else verdict="PATCHED_LIKELY"; fi
+    if [ "$u" -le 512 ]; then verdict="AFFECTED_BASE"; else verdict="PATCHED_LIKELY"; fi
   elif [[ "$v" =~ ^8u([0-9]+) ]]; then
     local u="${BASH_REMATCH[1]}"
-    if [ "$u" -le 512 ]; then verdict="AFFECTED_BASE"; elif [ "$u" -le 513 ]; then verdict="UNKNOWN"; else verdict="PATCHED_LIKELY"; fi
+    if [ "$u" -le 512 ]; then verdict="AFFECTED_BASE"; else verdict="PATCHED_LIKELY"; fi
   elif [[ "$v" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(\.([0-9]+))? ]]; then
     local maj="${BASH_REMATCH[1]}" min="${BASH_REMATCH[2]}" pat="${BASH_REMATCH[3]}"
     local extra="${BASH_REMATCH[5]}"

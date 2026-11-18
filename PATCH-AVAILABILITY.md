@@ -20,12 +20,27 @@ date and the imported OpenJDK baseline, not on an explicit CVE line.
 
 ## Upstream and Oracle
 
-- **OpenJDK / Oracle JDK**: fixed in the updates announced by the OpenJDK advisory of
-  2026-11-17 (affected 27.0.1.0.3, 25.0.5.0.3, 21.0.13.0.3, 17.0.21.0.3, 11.0.33, 8u512 and
-  earlier). Oracle ships the fix through the November 2026 Critical Security Patch Update:
-  https://www.oracle.com/security-alerts/cspunov2026.html
-- **Oracle GraalVM for JDK / Enterprise Edition**: fixed through the same Oracle CPU for the affected
-  versions listed in the Oracle risk matrix.
+**Fixed builds named by the Canadian Centre for Cyber Security (AL26-029, page read 18 Nov 2026):**
+
+| Product | Affected | Fixed |
+|---|---|---|
+| Oracle Java SE 8 | 8u511b33-perf | **8u513-perf** |
+| Oracle Java SE 17 | 17.0.6 to 17.0.21.0.3 | **17.0.21.1** |
+| Oracle Java SE 21 | 21.0.13.0.3 and prior | **21.0.13.1** |
+| Oracle Java SE 25 | 25.0.5.0.3 and prior | **25.0.5.1** |
+| Oracle Java SE 27 | 27.0.1.0.3 and prior | **27.0.1.1** |
+| Oracle GraalVM for JDK | 17.0.6–17.0.21.0.3 and 21.0.0–21.0.13.0.3 | **17.0.21.1, 21.0.13.1** |
+| Oracle GraalVM EE | 21.3.20.0.3 and prior | **21.3.20.1** |
+| Oracle OpenJDK | 17.0.6–27.0.1.0.3 | **27.0.1.1** |
+
+The Oracle CPU page we captured does not display the `8u513` build string, so that specific line rests
+on the Canadian Centre's reading of Oracle's advisory; the 17/21/25/27 lines match the OpenJDK patch
+releases that Corretto imports. **Numbering differs by vendor:** Oracle Java 8 fixed is `8u513-perf`,
+Amazon Corretto 8 is `8.514.01.1`, OpenJDK 8u is `8u514-b01`. Do not compare strings across vendors.
+
+- **OpenJDK advisory** (2026-11-17): affected 27.0.1.0.3, 25.0.5.0.3, 21.0.13.0.3, 17.0.21.0.3,
+  11.0.33, 8u512 and earlier; fixed patch releases as above.
+- **Oracle CPU November 2026**: https://www.oracle.com/security-alerts/cspunov2026.html
 - The same patch set contains nine further Java SE CVEs (CVE-2026-114939 to CVE-2026-114947) and
   OpenJFX CVE-2026-86144. Treat the update as a security patch set, not a single-CVE fix.
 
