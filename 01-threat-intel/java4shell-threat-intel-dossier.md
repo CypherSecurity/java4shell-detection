@@ -21,7 +21,7 @@ disagree). Deliverables contain no exploit code.
 | CVE | **CVE-2026-114938** | NVD record |
 | Name | **Java4Shell** | Calif.io disclosure |
 | Published (NVD) | 2026-11-17T22:18:23Z | verified, NVD |
-| NVD lastModified | 2026-11-18T13:45:37Z (status moved to Awaiting Analysis; refs 9, scores and CWE unchanged) | verified, NVD |
+| NVD lastModified | 2026-11-18T20:18:09Z (refs **11**: Siemens SSA-272816 and the Ubuntu tracker added on 18 Nov; scores and CWE unchanged) | verified, NVD |
 | NVD status | **`Undergoing Analysis`** (Received → Awaiting Analysis → Undergoing Analysis, 18 Nov; not yet analyzed) | verified, NVD |
 | Oracle CVSS 3.1 | **8.1** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H` | verified, NVD + Oracle CPU |
 | Calif CVSS 4.0 | **9.2 CRITICAL** | vendor-reported, Calif |
@@ -177,10 +177,10 @@ capability claim from a repository until we have run it ourselves and recorded t
 **Exploitation attempts, 17–18 November (verified from GreyNoise's live dashboard, read 18 Nov 20:00 UTC).**
 GreyNoise reports scanning and exploitation attempts against CVE-2026-114938:
 
-- **4 source IPs** sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
+- **4 source IPs** (still four at 22:00 UTC) sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
   Bearer): `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`, `134.82.73[.]91`.
-- **69 shaped requests** in total, against paths such as `/`, `/api/`, `/rest/api-application/1.0/
-  application-info` and `/rpc/xml`.
+- **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC**, against paths such as `/`, `/api/`, `/rest/api-
+  application/1.0/application-info` and `/rpc/xml`.
 - **0 successful intrusions**; GreyNoise states it has "not confirmed successful exploitation against
   GreyNoise gridpoints yet".
 - GreyNoise tags in use: **"Base64 Heap Overflow RCE Attempt v2"** (malicious) and **"Scanner Check"**
@@ -316,6 +316,24 @@ advisory; re-read before quoting Cisco product exposure.
 and reports IPS protection for the public PoC; its own update says patching remains the only complete
 fix. The flag is verified in OpenJDK source (see §7).
 
+**Cisco, advisory v1.1 (verified, read directly 18 November 2026 21:16 GMT).** Cisco moved from "under
+investigation" to naming affected products, all with **fixed releases TBD**: Catalyst Center; Smart PHY;
+Connected Mobile Experiences (fixed 11.2, TBD); Secure Network Analytics (fixed 7.6.0, TBD); Secure
+Workload; Cisco IQ Virtual Appliance (fixed v1.3.2, TBD); Smart Software Manager On-Prem; cnBNG; Optical
+Network Planner (in releases 26.4.1 and later); Services as Code common automation framework; Splunk
+AppDynamics On-Premises Virtual Appliance (fixed 27.1.0, TBD); Ultra Cloud Core Subscriber Microservices
+Infrastructure; Intersight Virtual Appliance. **Not affected** (Cisco's statement): Catalyst SD-WAN
+Controller, SD-WAN Manager, SD-WAN Validator, ISE, IOS XR, Nexus Dashboard, NX-OS, ASA, FMC, FTD, UCS
+Director. **Under investigation:** IOS XE, UCS Central. Workarounds: none.
+
+**Apache Shiro (verified, read directly 18 November 2026).** Not a vulnerability in Shiro itself, but
+Shiro's `CookieRememberMeManager` Base64-encodes serialized identity data into the remember-me cookie and
+decodes it on read via `java.util.Base64`, so a request through that path can reach the vulnerable decoder.
+Exposure still depends on runtime, CPU and whether the application reaches it. Remediation is a fixed JDK;
+changing the Shiro version does not fix it. Shiro repeats the JVM-option mitigation
+(`JAVA_TOOL_OPTIONS='-XX:-UseBASE64Intrinsics'`) as temporary. Practical consequence: Shiro remember-me
+cookies are another **pre-authentication** Base64 sink, alongside HTTP Basic auth.
+
 **Siemens (verified, read directly 18 November 2026).** SSA-272816, "Java4Shell Vulnerability in
 Industrial Edge", **V1.0, published 2026-11-18**, CVSS 3.1 8.1. **Affected with no fix available at V1.0:**
 Industrial Edge Management Pro V1, IEM Pro V2 and IEM Virtual, all versions. Known not affected:
@@ -351,6 +369,7 @@ Primary:
 - Cisco advisory (interim, read directly): https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-nov2026-java-rce-eCa6ss9z
 - Siemens SSA-272816 (read directly): https://cert-portal.siemens.com/productcert/html/ssa-272816.html
 - Keycloak guidance: https://www.keycloak.org/2026/11/java4shell-vulnerability-cve-2026-114938
+- Apache Shiro guidance: https://shiro.apache.org/blog/2026/11/apache-shiro-java4shell.html
 - GreyNoise live activity dashboard (read directly): https://java4shell.events.greynoise.io/
 - Canadian Centre for Cyber Security AL26-029: https://www.cyber.gc.ca/en/alerts-advisories/al26-029-critical-vulnerability-impacting-oracle-java-cve-2026-114938
 - Cisco Talos analysis: https://blog.talosintelligence.com/java4shell/

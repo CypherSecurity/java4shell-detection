@@ -19,6 +19,19 @@ attribution.
 A trigger-shaped request is an attempt, not a success. If GreyNoise's successful-intrusion counter moves
 off zero, escalate the posture and say so plainly.
 
+## Pre-authentication Base64 sinks to review (not just HTTP Basic)
+
+Beyond `Authorization: Basic`, applications decode attacker-influenced Base64 before authentication in
+several common paths. Verified examples:
+
+- **Apache Shiro remember-me cookies** (`CookieRememberMeManager`): the cookie value is Base64-decoded via
+  `java.util.Base64` on read, so a request carrying a crafted remember-me cookie reaches the decoder. Changing
+  the Shiro version does not fix it; the JDK must be patched.
+- SAML artifacts, CSRF tokens and file-upload bodies, as noted in the disclosure.
+
+Inventory these paths on internet-facing Java services and apply `-XX:-UseBASE64Intrinsics` to their JVMs
+until the JDK is patched.
+
 ## H1: JVM crash artefacts on internet-facing Java services
 
 Look for `hs_err_pid*.log`, core dumps and `java` processes that died without graceful shutdown:
