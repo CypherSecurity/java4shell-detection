@@ -21,7 +21,7 @@ disagree). Deliverables contain no exploit code.
 | CVE | **CVE-2026-114938** | NVD record |
 | Name | **Java4Shell** | Calif.io disclosure |
 | Published (NVD) | 2026-11-17T22:18:23Z | verified, NVD |
-| NVD lastModified | 2026-11-18T20:18:09Z (refs **11**: Siemens SSA-272816 and the Ubuntu tracker added on 18 Nov; scores and CWE unchanged) | verified, NVD |
+| NVD status | **Modified** since 19 Nov 21:17Z, **refs 14** (14th is Siemens **SSA-810379**, published 19 Nov); earlier `Analyzed` on 19 Nov 11:47Z; scores (8.1 Oracle secondary) and CWE-122 unchanged | verified, NVD |
 | NVD status | **`Undergoing Analysis`** (Received → Awaiting Analysis → Undergoing Analysis, 18 Nov; not yet analyzed) | verified, NVD |
 | Oracle CVSS 3.1 | **8.1** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H` | verified, NVD + Oracle CPU |
 | Calif CVSS 4.0 | **9.2 CRITICAL** | vendor-reported, Calif |
@@ -160,6 +160,32 @@ Assessment: the barrier to a first working exploit is **not** the trigger, it is
 heap shaping. Expect product-specific exploits to appear in the coming days to weeks. A KEV addition
 would change the calculus; there is no sign of one yet.
 
+**Disclosure timeline and pre-disclosure history (added by Calif on 19 November; verified against the
+primary repositories it names).** Calif published a timeline that materially changes the "who knew what
+when" picture:
+
+| Date (2026, Pacific) | Event |
+|---|---|
+| 9 June | **sundarms hit the bug in the wild** and opened an Adoptium support issue — a crash, months before disclosure |
+| 8 September | sundarms posted a public PoC that reproduced the crash; **albertnetymk identified the root cause the same day** |
+| 9 September | albertnetymk opened **openjdk/jdk#32781**, "8392044: AVX-512 Base64 decoder overwrites output buffer on short padded tail" |
+| 4 November | **PR #32781 was closed without merging** (verified via GitHub API; created 9 Sep, closed 4 Nov) |
+| 24 October | Quang Luong (Calif) independently found the bug with Codex; reported to Oracle with a **post-auth RCE PoC against Elasticsearch** |
+| 29–31 October | Oracle asked for more information; Calif supplied **pre-auth PoCs against Jenkins and Keycloak** |
+| 9 November | Calif told Oracle the bug was already public (in report form) and asked to start disclosure coordination |
+| 13 November | Oracle said it had fixed the bug and would ship on 17 November, 13:00 Pacific |
+| 14–17 November | Calif notified government agencies and industry partners |
+| 17 November | Oracle released fixes and credited albertnetymk and Quang Luong; Calif published the write-up |
+| 19 November | Calif added this timeline to its write-up |
+
+Calif's framing is that the bug "had already been reported, but it was patched only after we showed it
+could be exploited." The repository metadata supports the sequence: a public PoC from 8 September and a
+fix PR opened 9 September, closed unmerged on 4 November, with the Oracle fix arriving 17 November.
+**Calibrated labels:** the June "hit in the wild" is a *crash/reliability* report, not a demonstrated
+compromise; no RCE is claimed for it. The Jenkins/Keycloak/Elasticsearch PoCs are Calif's own product-
+specific work, released as claims with PoCs withheld. What this adds for defenders is motive to hunt
+pre-September crash telemetry as well as post-17-November exploitation attempts.
+
 **Observed PoC ecosystem (18 Nov 2026, verified against repository metadata):** GitHub returns 32
 repositories for "java4shell" and 31 for the CVE id. The most-starred is `ikow/java4shell-poc` (★104),
 described by its author as "OpenJDK AVX-512 Base64 heap overflow PoC, scanner & detection rules
@@ -179,11 +205,11 @@ GreyNoise reports scanning and exploitation attempts against CVE-2026-114938:
 
 - **4 source IPs** sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
   Bearer) by 22:00 UTC on 18 Nov: `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`,
-  `134.82.73[.]91`. By **19 Nov 09:00 UTC the count was 5 IPs and 187 shaped requests**, still **0
+  `134.82.73[.]91`. By **19 Nov 21:00 UTC the count was 7 IPs and 197 shaped requests**, still **0
   successful intrusions**.
-- **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC on 18 Nov, 125 at 07:00 and 187 at 09:00 on 19
-  Nov**, against
-  paths such as `/`, `/api/`, `/rest/api-application/1.0/application-info` and `/rpc/xml`.
+- **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC on 18 Nov, 125 at 07:00, 187 at 09:00, 192 at
+  14:00 and 197 at 21:00 on 19 Nov**, against paths such as `/`, `/api/`,
+  `/rest/api-application/1.0/application-info` and `/rpc/xml`.
 - **0 successful intrusions**; GreyNoise states it has "not confirmed successful exploitation against
   GreyNoise gridpoints yet".
 - GreyNoise tags in use: **"Base64 Heap Overflow RCE Attempt v2"** (malicious) and **"Scanner Check"**
@@ -331,6 +357,14 @@ test; treat it as vendor-reported. It still recommends patching as the only comp
 and reports IPS protection for the public PoC; its own update says patching remains the only complete
 fix. The flag is verified in OpenJDK source (see §7).
 
+**Siemens, second advisory SSA-810379 (verified, read directly 19 November 2026).** Published and last
+updated **19 November**, V1.0, CVSS 3.1 **8.1**. It covers **Siveillance Control** and **Siveillance
+Control Pro, all versions**, both **affected with no fix available**. The conditions match the general
+disclosure: affected JVM (including bundled runtimes), x86-64 with AVX-512 VBMI, untrusted Base64 reaching
+the decoder, and a JIT-compiled decoder. Mitigation is the same temporary JVM flag
+(`-XX:-UseBASE64Intrinsics`) until Siemens ships fixes. This is in addition to SSA-272816 (Industrial
+Edge Management Pro V1/V2/Virtual, also no fix).
+
 **Red Hat (verified, read directly from the Red Hat CVE API 19 November 2026).** Severity **Critical**,
 public date 2026-11-17T21:00Z. Fixed builds released **2026-11-18**: **Red Hat Build of OpenJDK
 17.0.21.1**, **21.0.13.1** and **25.0.5.1** (portable and Windows packages). **RHEL channel errata
@@ -433,6 +467,8 @@ Primary:
 - CISA alert, 17 November 2026: https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching
 - Cisco advisory (interim, read directly): https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-nov2026-java-rce-eCa6ss9z
 - Siemens SSA-272816 (read directly): https://cert-portal.siemens.com/productcert/html/ssa-272816.html
+- Siemens SSA-810379 (Siveillance Control / Control Pro): https://cert-portal.siemens.com/productcert/html/ssa-810379.html
+- OpenJDK pre-disclosure fix PR (closed unmerged): https://github.com/openjdk/jdk/pull/32781
 - Keycloak guidance: https://www.keycloak.org/2026/11/java4shell-vulnerability-cve-2026-114938
 - Red Hat CVE API record: https://access.redhat.com/hydra/rest/securitydata/cve/CVE-2026-114938.json
 - Adoptium Temurin release metadata (temurin17/21/25-binaries, latest releases)
