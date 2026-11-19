@@ -287,8 +287,14 @@ it out. Check Point separately states that **Check Point IPS protection for the 
 ## 8. Open questions
 
 1. Resolve the 8/11 affected-version inconsistency in the OpenJDK advisory (text versus risk matrix).
-2. Locate the OpenJDK source fix and confirm the exact commit; oss-security noted on 17 Nov that it
-   had not yet seen a linked fix.
+2. ~~Locate the OpenJDK source fix and confirm the exact commit.~~ **Resolved 19 November.** The fix
+   commit is public: **openjdk/jdk `5177a70b385c16f26ede191fdac7aaba0bed0f8b`**, "8393212: Base64
+   optimization improvements", authored by Tobias Hartmann on **13 October 2026**, touching
+   `src/hotspot/cpu/x86/stubGenerator_x86_64.cpp`. The patch adds a **`cmpl(length, 4)` / jump-to-
+   brute-force guard** in `generate_base64_decodeBlock()` so a padded Base64 tail shorter than a
+   complete block is handled by Java rather than the assembly fast path. Verified via the GitHub API;
+   the oss-security post of 19 November (Solar Designer) supplied the reference. This closes the
+   "no linked fix" gap noted on 17 November.
 3. Which vendors have published fixed builds beyond Corretto and Oracle (Temurin, Zulu, Microsoft,
    Liberica, SapMachine, Red Hat), with version numbers.
 4. Product advisories: Atlassian, Jenkins, JFrog, Keycloak/Red Hat, Ping Identity — what do they
@@ -327,9 +333,11 @@ fix. The flag is verified in OpenJDK source (see §7).
 
 **Red Hat (verified, read directly from the Red Hat CVE API 19 November 2026).** Severity **Critical**,
 public date 2026-11-17T21:00Z. Fixed builds released **2026-11-18**: **Red Hat Build of OpenJDK
-17.0.21.1**, **21.0.13.1** and **25.0.5.1** (portable and Windows packages). Despite that, Red Hat's
-package state still lists **`java-17-openjdk` / `java-21-openjdk` / `java-25-openjdk` on RHEL 8, 9 and 10
-as Affected**, so channel errata availability must be checked rather than assumed. Also listed
+17.0.21.1**, **21.0.13.1** and **25.0.5.1** (portable and Windows packages). **RHEL channel errata
+followed on 19 November**: the Red Hat CVE record now lists **29 fixed channel entries**, including
+RHEL 8/9/10 `java-17-openjdk` **17.0.21.1.2**, `java-21-openjdk` **21.0.13.1.2** and `java-25-openjdk`
+**25.0.5.1.2**, plus EUS, E4S, TUS and SAP Solutions channels. That resolves the earlier "channels still
+listed Affected" caveat, which applied before the errata landed. Also listed
 affected: **Red Hat Build of Keycloak** (`rhbk/keycloak-rhel9`), OpenShift Pipelines, Quarkus native
 builders (mandrel), JBoss EAP 7/8 and JBoss Web Server 7 (OpenJDK 17 images), Red Hat Hardened Images
 and the Konflux UBI OpenJDK 21 container. Java 8 and 11 builds are listed **not affected**, matching the
@@ -401,6 +409,8 @@ Primary:
 - Red Hat CVE API record: https://access.redhat.com/hydra/rest/securitydata/cve/CVE-2026-114938.json
 - Adoptium Temurin release metadata (temurin17/21/25-binaries, latest releases)
 - Apache Shiro guidance: https://shiro.apache.org/blog/2026/11/apache-shiro-java4shell.html
+- oss-security thread, 19 November (fix commit reference): http://www.openwall.com/lists/oss-security/2026/11/19/5
+- OpenJDK fix commit: https://github.com/openjdk/jdk/commit/5177a70b385c16f26ede191fdac7aaba0bed0f8b
 - GreyNoise live activity dashboard (read directly): https://java4shell.events.greynoise.io/
 - Canadian Centre for Cyber Security AL26-029: https://www.cyber.gc.ca/en/alerts-advisories/al26-029-critical-vulnerability-impacting-oracle-java-cve-2026-114938
 - Cisco Talos analysis: https://blog.talosintelligence.com/java4shell/
