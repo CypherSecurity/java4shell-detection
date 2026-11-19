@@ -348,6 +348,28 @@ builds published **2026-11-18**: **jdk-17.0.21.1+2**, **jdk-21.0.13.1+2** and **
 Keycloak's guidance says Temurin **Linux** builds are released while other platforms are still in
 progress, so do not assume every platform has a fixed Temurin build yet.
 
+**Ubuntu (verified from ubuntu.com/security/CVE-2026-114938, 19 November).** Fixes published **18
+November** for **openjdk-17** (`17.0.21.1+2-1~<release>.1`, 20.04 through 26.10), **openjdk-21**
+(`21.0.13.1+2-1~<release>.1`; on 20.04 the fix is via **Ubuntu Pro ESM Apps**, with no public community
+fix yet), **openjdk-25** (`25.0.5.1+2-1~<release>.1`, 22.04 through 26.10) and **openjdk-27**
+(`27.0.1.1+4-1~26.10.1`, on 26.10 only). Ubuntu priority: High. **Two packages remain vulnerable:
+`openjdk-21-crac` and `openjdk-25-crac`** (the CRaC variants), and `openjdk-26` needs evaluation —
+worth knowing if CRaC images are in use. Ubuntu's page is our source; the earlier monitor reading of
+"Not in release / Ignored" cells was a parsing artefact of the wrong table, now fixed.
+
+**Debian (verified from the Debian security tracker, 19 November).** Debian 13 trixie: **openjdk-21
+`21.0.13.1+2-1~deb13u1` fixed** and **openjdk-25 `25.0.5.1+2-1~deb13u1` fixed**. Debian 12 bookworm:
+**openjdk-17 `17.0.21.1+2-1~deb12u1` fixed in the security suite via DLA-4917-1**, although the base
+bookworm pocket still carries `17.0.19+10-1~deb12u2` until a point release, which is why summaries can
+call Debian 12 vulnerable; patch through the security/DLA channel. sid/forky carry fixed packages for
+the newer lines.
+
+**Tenable (vendor-reported product statement, 19 November).** Tenable's update states that its product
+statement lists **Tenable Enclave Security and Tenable OT as affected** by CVE-2026-114938; the full
+statement is Tenable's to publish, and we have not verified affected versions or fixed builds. Tenable
+also added to its key takeaways that **no universal exploit exists** and included Keycloak's fixed
+container images.
+
 **Cisco, advisory v1.1 (verified, read directly 18 November 2026 21:16 GMT).** Cisco moved from "under
 investigation" to naming affected products, all with **fixed releases TBD**: Catalyst Center; Smart PHY;
 Connected Mobile Experiences (fixed 11.2, TBD); Secure Network Analytics (fixed 7.6.0, TBD); Secure
