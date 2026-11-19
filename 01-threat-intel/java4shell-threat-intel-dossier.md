@@ -370,15 +370,21 @@ statement is Tenable's to publish, and we have not verified affected versions or
 also added to its key takeaways that **no universal exploit exists** and included Keycloak's fixed
 container images.
 
-**Cisco, advisory v1.1 (verified, read directly 18 November 2026 21:16 GMT).** Cisco moved from "under
-investigation" to naming affected products, all with **fixed releases TBD**: Catalyst Center; Smart PHY;
-Connected Mobile Experiences (fixed 11.2, TBD); Secure Network Analytics (fixed 7.6.0, TBD); Secure
-Workload; Cisco IQ Virtual Appliance (fixed v1.3.2, TBD); Smart Software Manager On-Prem; cnBNG; Optical
-Network Planner (in releases 26.4.1 and later); Services as Code common automation framework; Splunk
-AppDynamics On-Premises Virtual Appliance (fixed 27.1.0, TBD); Ultra Cloud Core Subscriber Microservices
-Infrastructure; Intersight Virtual Appliance. **Not affected** (Cisco's statement): Catalyst SD-WAN
-Controller, SD-WAN Manager, SD-WAN Validator, ISE, IOS XR, Nexus Dashboard, NX-OS, ASA, FMC, FTD, UCS
-Director. **Under investigation:** IOS XE, UCS Central. Workarounds: none.
+**Cisco, advisory v1.2 (verified, read directly 19 November 2026 20:22 GMT).** Cisco continues to expand
+the advisory, Version 1.2, Interim, with **fixed releases still TBD** and **no workarounds**. The affected
+list now covers: **Smart PHY**; **Connected Mobile Experiences** (11.2 TBD); **Secure Network Analytics**
+(7.6.0 TBD); **Secure Workload**; **Cisco IQ Virtual Appliance** (v1.3.2 TBD); **Crosswork Assurance User
+Experience**; **Crosswork Workflow Manager**; **License / Smart Software Manager On-Prem** (CSCwx86829,
+10-202701 TBD); **cnBNG** (CSCwx86764, 2027.01 TBD); **Optical Network Planner** (26.4.1 and later);
+**Services as Code CAF** (CSCwx86765, CAF 1.33 TBD); **Splunk AppDynamics On-Premises Enterprise Console**
+(CSCwx86817) and **Virtual Appliance** (CSCwx86817, 27.1.0 TBD); **NextFusion Platform**; **Ultra Cloud
+Core Network Repository Function** (CSCwx86832); **Ultra Cloud Core Subscriber Microservices
+Infrastructure**; **Intersight Virtual Appliance**; **Finesse** (CSCwx86820, 15.0(1)SU3 TBD); **Unified
+Contact Center Enterprise** (CSCwx86838); **Unified Customer Voice Portal** (CSCwx86786); **Unified
+Intelligence Center** (CSCwx86841, 15.0(1)SU3 TBD); **Virtualized Voice Browser** (CSCwx86842). Catalyst
+Center has bug ID CSCwx86774. **IOS XE and UCS Central moved from "under investigation" to Not
+affected** in v1.2. Many earlier "Not affected" entries stand (SD-WAN Controller/Manager/Validator, ISE,
+IOS XR, Nexus Dashboard, NX-OS, ASA, FMC, FTD, UCS Director). No workarounds.
 
 **Apache Shiro (verified, read directly 18 November 2026).** Not a vulnerability in Shiro itself, but
 Shiro's `CookieRememberMeManager` Base64-encodes serialized identity data into the remember-me cookie and
