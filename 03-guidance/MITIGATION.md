@@ -45,8 +45,10 @@ reconciliation. Verify the running JVM, not the environment variable:
     jcmd <pid> VM.flags -all | grep UseBASE64Intrinsics
     # expected: bool UseBASE64Intrinsics = false {product} {command line}
 
-Check every pod and failover node. At the time of writing the Keycloak team had not published a
-recommended fixed image; take rebuilt images when they appear.
+Check every pod and failover node. **Update, 19 November:** the Keycloak team has now published fixed
+26.8 images built on Red Hat OpenJDK 21.0.13.1 (tags include `26.8.2-3`). **Prefer upgrading to a fixed
+image**; keep the flag only for hosts that cannot move yet, and verify the bundled runtime rather than
+the Keycloak version alone.
 
 **Siemens Industrial Edge.** SSA-272816 lists Industrial Edge Management Pro V1, Pro V2 and Virtual as
 affected with **no fix available at V1.0**. Siemens' mitigation is to block direct internet access to

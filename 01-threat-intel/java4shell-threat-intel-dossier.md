@@ -177,10 +177,13 @@ capability claim from a repository until we have run it ourselves and recorded t
 **Exploitation attempts, 17–18 November (verified from GreyNoise's live dashboard, read 18 Nov 20:00 UTC).**
 GreyNoise reports scanning and exploitation attempts against CVE-2026-114938:
 
-- **4 source IPs** (still four at 22:00 UTC) sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
-  Bearer): `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`, `134.82.73[.]91`.
-- **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC**, against paths such as `/`, `/api/`, `/rest/api-
-  application/1.0/application-info` and `/rpc/xml`.
+- **4 source IPs** sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
+  Bearer) by 22:00 UTC on 18 Nov: `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`,
+  `134.82.73[.]91`. By **19 Nov 09:00 UTC the count was 5 IPs and 187 shaped requests**, still **0
+  successful intrusions**.
+- **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC on 18 Nov, 125 at 07:00 and 187 at 09:00 on 19
+  Nov**, against
+  paths such as `/`, `/api/`, `/rest/api-application/1.0/application-info` and `/rpc/xml`.
 - **0 successful intrusions**; GreyNoise states it has "not confirmed successful exploitation against
   GreyNoise gridpoints yet".
 - GreyNoise tags in use: **"Base64 Heap Overflow RCE Attempt v2"** (malicious) and **"Scanner Check"**
@@ -312,9 +315,30 @@ AVX-512 and ARM or Cisco Silicon One are not. Exploitation: Cisco PSIRT "is awar
 exploit code is available" and "is not aware of any malicious use". Treat this as an open, evolving
 advisory; re-read before quoting Cisco product exposure.
 
-**Check Point (vendor-reported).** Recommends a startup flag where patching cannot happen immediately
+**Check Point (vendor-reported, updated 19 Nov).** Its post now replaces the earlier IPS sentence with a
+claim that **Check Point WAF** "provides comprehensive, multilayered protection against the currently
+validated Java4Shell exploitation techniques", combining "preemptive AI-based RCE prevention" with WAF
+signatures that block the public Base64-decoder PoC. That is a vendor product claim, not an independent
+test; treat it as vendor-reported. It still recommends patching as the only complete fix.
+
+**Check Point mitigation guidance (vendor-reported).** Recommends a startup flag where patching cannot happen immediately
 and reports IPS protection for the public PoC; its own update says patching remains the only complete
 fix. The flag is verified in OpenJDK source (see §7).
+
+**Red Hat (verified, read directly from the Red Hat CVE API 19 November 2026).** Severity **Critical**,
+public date 2026-11-17T21:00Z. Fixed builds released **2026-11-18**: **Red Hat Build of OpenJDK
+17.0.21.1**, **21.0.13.1** and **25.0.5.1** (portable and Windows packages). Despite that, Red Hat's
+package state still lists **`java-17-openjdk` / `java-21-openjdk` / `java-25-openjdk` on RHEL 8, 9 and 10
+as Affected**, so channel errata availability must be checked rather than assumed. Also listed
+affected: **Red Hat Build of Keycloak** (`rhbk/keycloak-rhel9`), OpenShift Pipelines, Quarkus native
+builders (mandrel), JBoss EAP 7/8 and JBoss Web Server 7 (OpenJDK 17 images), Red Hat Hardened Images
+and the Konflux UBI OpenJDK 21 container. Java 8 and 11 builds are listed **not affected**, matching the
+OpenJDK advisory's 17+ scope.
+
+**Eclipse Temurin / Adoptium (verified from the project's own release metadata 19 November).** Fixed
+builds published **2026-11-18**: **jdk-17.0.21.1+2**, **jdk-21.0.13.1+2** and **jdk-25.0.5.1+2**.
+Keycloak's guidance says Temurin **Linux** builds are released while other platforms are still in
+progress, so do not assume every platform has a fixed Temurin build yet.
 
 **Cisco, advisory v1.1 (verified, read directly 18 November 2026 21:16 GMT).** Cisco moved from "under
 investigation" to naming affected products, all with **fixed releases TBD**: Catalyst Center; Smart PHY;
@@ -349,9 +373,14 @@ distribution can also be affected depending on its runtime and CPU. Keycloak dec
 authentication, so a login requirement is not protection. Preferred interim mitigation is Red Hat's
 `-XX:-UseBASE64Intrinsics` via `JAVA_OPTS_APPEND`, with `JDK_JAVA_OPTIONS` for the Operator, verified on
 the live JVM with `jcmd ... VM.flags -all | grep UseBASE64Intrinsics` (expected
-`UseBASE64Intrinsics = false`). **At the time of writing the team cannot recommend a specific fixed
-Keycloak image** and will publish rebuilt images when patched runtimes are available. Treat Keycloak
-version numbers alone as insufficient.
+`UseBASE64Intrinsics = false`). **Update, 19 November 08:00 UTC: fixed images are now available.** The Keycloak team reports that
+**Keycloak container images for 26.8 have been updated to Red Hat OpenJDK 21.0.13.1**, which includes
+the fix for CVE-2026-114938; the updated tags include `latest`, `26.8`, `26.8.2` and **`26.8.2-3`**.
+It names fixed versions **17.0.21.1, 21.0.13.1 and 25.0.5.1**, states that Oracle and Red Hat have
+released updates, that **Eclipse Temurin for Linux** has been released while other platforms are "in
+progress", and warns that older OpenJDK 17/21/25 releases remain affected. Treat Keycloak version
+numbers alone as insufficient; verify the bundled runtime, and prefer moving to a fixed image over
+keeping the flag.
 
 No other product-vendor advisory has been verified by us as of 18 November 2026. Atlassian, Jenkins,
 JFrog, Keycloak/Red Hat and Ping Identity advisories are being watched; absence here means unverified,
@@ -369,6 +398,8 @@ Primary:
 - Cisco advisory (interim, read directly): https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-nov2026-java-rce-eCa6ss9z
 - Siemens SSA-272816 (read directly): https://cert-portal.siemens.com/productcert/html/ssa-272816.html
 - Keycloak guidance: https://www.keycloak.org/2026/11/java4shell-vulnerability-cve-2026-114938
+- Red Hat CVE API record: https://access.redhat.com/hydra/rest/securitydata/cve/CVE-2026-114938.json
+- Adoptium Temurin release metadata (temurin17/21/25-binaries, latest releases)
 - Apache Shiro guidance: https://shiro.apache.org/blog/2026/11/apache-shiro-java4shell.html
 - GreyNoise live activity dashboard (read directly): https://java4shell.events.greynoise.io/
 - Canadian Centre for Cyber Security AL26-029: https://www.cyber.gc.ca/en/alerts-advisories/al26-029-critical-vulnerability-impacting-oracle-java-cve-2026-114938
