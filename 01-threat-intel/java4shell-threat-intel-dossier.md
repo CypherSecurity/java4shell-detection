@@ -21,7 +21,7 @@ disagree). Deliverables contain no exploit code.
 | CVE | **CVE-2026-114938** | NVD record |
 | Name | **Java4Shell** | Calif.io disclosure |
 | Published (NVD) | 2026-11-17T22:18:23Z | verified, NVD |
-| NVD status | **Modified** since 19 Nov 21:17Z, **refs 14** (14th is Siemens **SSA-810379**, published 19 Nov); earlier `Analyzed` on 19 Nov 11:47Z; scores (8.1 Oracle secondary) and CWE-122 unchanged | verified, NVD |
+| NVD status | **`Undergoing Analysis`** again (20 Nov 19:00Z) after returning to `Analyzed` earlier the same day; **lastModified still 2026-11-20T16:54:52Z**, so the status change carries **no field change**. **refs 14** (14th is Siemens **SSA-810379**, published 19 Nov), LastModified **2026-11-20T19:18:45Z**. The record flipped `Analyzed` (16:54) → `Undergoing Analysis` (19:00) → `Analyzed` (19:18) with **no field change**; scores (8.1 Oracle secondary) and CWE-122 unchanged | verified, NVD |
 | NVD status | **`Undergoing Analysis`** (Received → Awaiting Analysis → Undergoing Analysis, 18 Nov; not yet analyzed) | verified, NVD |
 | Oracle CVSS 3.1 | **8.1** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H` | verified, NVD + Oracle CPU |
 | Calif CVSS 4.0 | **9.2 CRITICAL** | vendor-reported, Calif |
@@ -205,10 +205,11 @@ GreyNoise reports scanning and exploitation attempts against CVE-2026-114938:
 
 - **4 source IPs** sent a Java4Shell trigger-shaped value in an HTTP `Authorization` header (Basic or
   Bearer) by 22:00 UTC on 18 Nov: `31.76.87[.]52`, `217.138.216[.]145`, `45.13.212[.]209`,
-  `134.82.73[.]91`. By **19 Nov 21:00 UTC the count was 7 IPs and 197 shaped requests**, still **0
+  `134.82.73[.]91`. By **20 Nov 20:00 UTC the count was 7 IPs and 261 shaped requests**, still **0
   successful intrusions**.
 - **69 shaped requests by 20:00 UTC, 117 by 22:00 UTC on 18 Nov, 125 at 07:00, 187 at 09:00, 192 at
-  14:00 and 197 at 21:00 on 19 Nov**, against paths such as `/`, `/api/`,
+  14:00 and 197 at 21:00 on 19 Nov; then 197 through 19:00 on 20 Nov and a step to 261 by 20:00
+  (+64 in an hour, +32%)**, against paths such as `/`, `/api/`,
   `/rest/api-application/1.0/application-info` and `/rpc/xml`.
 - **0 successful intrusions**; GreyNoise states it has "not confirmed successful exploitation against
   GreyNoise gridpoints yet".
